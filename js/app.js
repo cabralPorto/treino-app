@@ -1,5 +1,19 @@
+import {
+    normalizarDados,
+    gerarIdUnico,
+    hojeISO,
+    diasDesde,
+    registrosDoExercicio,
+    upsertCarga
+} from "./logica.js";
+
+const VERSAO_APP = "0.1.0-beta";
 const CHAVE_STORAGE = "treinoAppState";
-const VERSAO_ATUAL = 2;
+const CHAVE_ULTIMO_BACKUP = "treinoAppUltimoBackup";
+const DIAS_PARA_LEMBRAR_BACKUP = 14;
+const TAMANHO_MAX_IMPORT = 2 * 1024 * 1024; // 2MB
+
+const SECAO_COM_CARGA = "Exercícios";
 
 const DADOS_PADRAO = {
     titulo: "Plano de Treino",
@@ -97,69 +111,6 @@ const DADOS_PADRAO = {
     cargas: []
 };
 
-const SECAO_COM_CARGA = "Exercícios";
-
-function slugify(texto){
-    return (texto || "")
-        .toString()
-        .normalize("NFD").replace(/[̀-ͯ]/g,"")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g,"-")
-        .replace(/^-+|-+$/g,"");
-}
-
-function gerarIdUnico(nomeBase, idsExistentes){
-    const base = slugify(nomeBase) || "exercicio";
-    let id = base, n = 2;
-    while(idsExistentes.has(id)){ id = `${base}-${n}`; n++; }
-    idsExistentes.add(id);
-    return id;
-}
-
-function normalizarDados(bruto){
-    const dados = JSON.parse(JSON.stringify(bruto || {}));
-    dados.titulo = dados.titulo ?? "";
-    dados.objetivo = dados.objetivo ?? "";
-    dados.dias = Array.isArray(dados.dias) ? dados.dias : [];
-
-    const idsExistentes = new Set();
-
-    dados.dias.forEach(dia=>{
-        dia.secoes = Array.isArray(dia.secoes) ? dia.secoes : [];
-        dia.secoes.forEach(secao=>{
-            const itensBrutos = Array.isArray(secao.itens) ? secao.itens : [];
-            secao.itens = itensBrutos.map(item=>{
-                if(Array.isArray(item)){
-                    const nome = item[0] ?? "";
-                    const reps = item[1] ?? "";
-                    return { id: gerarIdUnico(nome, idsExistentes), nome, reps };
-                }
-                if(item && typeof item === "object"){
-                    let id = item.id;
-                    if(!id || idsExistentes.has(id)){
-                        id = gerarIdUnico(item.nome, idsExistentes);
-                    } else {
-                        idsExistentes.add(id);
-                    }
-                    return { id, nome: item.nome ?? "", reps: item.reps ?? "" };
-                }
-                return { id: gerarIdUnico("exercicio", idsExistentes), nome:"", reps:"" };
-            });
-        });
-    });
-
-    dados.cargas = Array.isArray(dados.cargas)
-        ? dados.cargas.filter(c => c && c.exercicioId && c.data).map(c=>({
-            exercicioId: c.exercicioId,
-            data: c.data,
-            peso: Number(c.peso)
-        }))
-        : [];
-
-    dados.versao = VERSAO_ATUAL;
-    return dados;
-}
-
 function carregarEstado(){
     const salvo = localStorage.getItem(CHAVE_STORAGE);
     if(salvo){
@@ -170,43 +121,23 @@ function carregarEstado(){
 }
 
 function salvarEstado(){
-    localStorage.setItem(CHAVE_STORAGE, JSON.stringify(estado));
+    try{
+        localStorage.setItem(CHAVE_STORAGE, JSON.stringify(estado));
+    }catch(e){
+        console.warn("Falha ao salvar no localStorage:", e);
+        mostrarToast("Não foi possível salvar — armazenamento indisponível ou cheio.", "erro");
+    }
 }
 
 let estado = carregarEstado();
 let rascunho = null;
 let modoEdicao = false;
+let eventoInstalacao = null;
+let avisoBackupDispensado = false;
 const historicoAberto = new Set();
 
 function dadosAtuais(){
     return modoEdicao ? rascunho : estado;
-}
-
-function hojeISO(){
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-}
-
-function registrosDoExercicio(exercicioId){
-    return estado.cargas
-        .filter(c=>c.exercicioId === exercicioId)
-        .sort((a,b)=> a.data < b.data ? 1 : (a.data > b.data ? -1 : 0));
-}
-
-function upsertCarga(exercicioId, pesoTexto){
-    const data = hojeISO();
-    const idx = estado.cargas.findIndex(c=>c.exercicioId === exercicioId && c.data === data);
-    const pesoTrim = (pesoTexto ?? "").toString().trim();
-
-    if(pesoTrim === ""){
-        if(idx >= 0) estado.cargas.splice(idx,1);
-    } else {
-        const peso = Number(pesoTrim.replace(",", "."));
-        if(Number.isNaN(peso)) return;
-        if(idx >= 0) estado.cargas[idx].peso = peso;
-        else estado.cargas.push({ exercicioId, data, peso });
-    }
-    salvarEstado();
 }
 
 function renderizar(){
@@ -263,7 +194,7 @@ function renderizar(){
                         </li>
                     `;
                 } else if(comCarga){
-                    const registros = registrosDoExercicio(item.id);
+                    const registros = registrosDoExercicio(estado.cargas, item.id);
                     const registroHoje = registros.find(r=>r.data === hojeISO());
                     const ultimo = registros[0];
                     const aberto = historicoAberto.has(item.id);
@@ -339,7 +270,8 @@ function renderizar(){
     } else {
         container.querySelectorAll(".campo-kg").forEach(el=>{
             el.addEventListener("change", e=>{
-                upsertCarga(e.target.dataset.ex, e.target.value);
+                upsertCarga(estado.cargas, e.target.dataset.ex, e.target.value);
+                salvarEstado();
                 renderizar();
             });
         });
@@ -352,6 +284,8 @@ function renderizar(){
             });
         });
     }
+
+    atualizarAvisoBackup();
 }
 
 function escapeHtml(texto){
@@ -370,6 +304,20 @@ function mostrarToast(mensagem, tipo){
     toast.textContent = mensagem;
     document.body.appendChild(toast);
     setTimeout(()=> toast.remove(), 2600);
+}
+
+function atualizarAvisoBackup(){
+    const aviso = document.getElementById("avisoBackup");
+    if(!aviso) return;
+
+    if(avisoBackupDispensado || modoEdicao || estado.cargas.length === 0){
+        aviso.hidden = true;
+        return;
+    }
+
+    const ultimo = localStorage.getItem(CHAVE_ULTIMO_BACKUP);
+    const precisaAvisar = !ultimo || diasDesde(ultimo) >= DIAS_PARA_LEMBRAR_BACKUP;
+    aviso.hidden = !precisaAvisar;
 }
 
 document.getElementById("btnEditar").addEventListener("click", () => {
@@ -400,6 +348,10 @@ document.getElementById("btnExportar").addEventListener("click", () => {
     a.download = "plano-treino.json";
     a.click();
     URL.revokeObjectURL(url);
+
+    localStorage.setItem(CHAVE_ULTIMO_BACKUP, hojeISO());
+    avisoBackupDispensado = false;
+    atualizarAvisoBackup();
 });
 
 document.getElementById("btnImportar").addEventListener("click", () => {
@@ -409,6 +361,13 @@ document.getElementById("btnImportar").addEventListener("click", () => {
 document.getElementById("inputImportar").addEventListener("change", (e) => {
     const arquivo = e.target.files[0];
     if(!arquivo) return;
+
+    if(arquivo.size > TAMANHO_MAX_IMPORT){
+        mostrarToast("Arquivo muito grande (máximo de 2MB).", "erro");
+        e.target.value = "";
+        return;
+    }
+
     const leitor = new FileReader();
     leitor.onload = () => {
         try{
@@ -429,6 +388,39 @@ document.getElementById("inputImportar").addEventListener("change", (e) => {
 });
 
 document.getElementById("btnImprimir").addEventListener("click", () => window.print());
+
+document.getElementById("btnFecharAviso")?.addEventListener("click", () => {
+    avisoBackupDispensado = true;
+    atualizarAvisoBackup();
+});
+
+document.getElementById("btnExportarAviso")?.addEventListener("click", () => {
+    document.getElementById("btnExportar").click();
+});
+
+window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    eventoInstalacao = e;
+    const btn = document.getElementById("btnInstalar");
+    if(btn) btn.hidden = false;
+});
+
+document.getElementById("btnInstalar")?.addEventListener("click", async () => {
+    if(!eventoInstalacao) return;
+    eventoInstalacao.prompt();
+    await eventoInstalacao.userChoice;
+    eventoInstalacao = null;
+    document.getElementById("btnInstalar").hidden = true;
+});
+
+window.addEventListener("appinstalled", () => {
+    const btn = document.getElementById("btnInstalar");
+    if(btn) btn.hidden = true;
+    eventoInstalacao = null;
+});
+
+const elVersao = document.getElementById("appVersao");
+if(elVersao) elVersao.textContent = `v${VERSAO_APP}`;
 
 renderizar();
 

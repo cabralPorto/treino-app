@@ -1,9 +1,12 @@
-const CACHE_NAME = "treino-app-v2";
+const CACHE_NAME = "treino-app-v4";
 const APP_SHELL = [
     "./",
     "./index.html",
+    "./privacidade.html",
+    "./termos.html",
     "./css/styles.css",
     "./js/app.js",
+    "./js/logica.js",
     "./manifest.webmanifest",
     "./icons/icon-192.png",
     "./icons/icon-512.png"
