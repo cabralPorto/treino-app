@@ -2,8 +2,8 @@ const CHAVE_STORAGE = "treinoAppState";
 const VERSAO_ATUAL = 2;
 
 const DADOS_PADRAO = {
-    titulo: "Plano de Treino — Primeiros 30 Dias",
-    objetivo: "Retornar à musculação minimizando o risco de reacender o processo inflamatório cervical.",
+    titulo: "Plano de Treino",
+    objetivo: "",
     dias: [
         {
             dia: "Segunda-feira",
@@ -221,13 +221,15 @@ function renderizar(){
         headerTitulo.innerHTML = `<input type="text" id="campoTituloHeader" value="${escapeAttr(dados.titulo)}">`;
         headerObjetivo.innerHTML = `
             <strong>Objetivo:</strong>
-            <textarea id="campoObjetivo" rows="3">${escapeHtml(dados.objetivo)}</textarea>
+            <textarea id="campoObjetivo" rows="3" placeholder="Ex: ganhar força, emagrecer, manter a constância...">${escapeHtml(dados.objetivo)}</textarea>
         `;
         document.getElementById("campoTituloHeader").addEventListener("input", e=>{ rascunho.titulo = e.target.value; });
         document.getElementById("campoObjetivo").addEventListener("input", e=>{ rascunho.objetivo = e.target.value; });
     } else {
         headerTitulo.innerHTML = `<h1>${escapeHtml(dados.titulo)}</h1>`;
-        headerObjetivo.innerHTML = `<strong>Objetivo:</strong> ${escapeHtml(dados.objetivo)}`;
+        headerObjetivo.innerHTML = dados.objetivo
+            ? `<strong>Objetivo:</strong> ${escapeHtml(dados.objetivo)}`
+            : "";
     }
 
     document.getElementById("btnEditar").hidden = modoEdicao;
