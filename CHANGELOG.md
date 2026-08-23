@@ -3,6 +3,12 @@
 Todas as mudanças relevantes deste projeto são documentadas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/).
 
+## [0.5.0-beta] - 2026-08-22
+
+### Alterado
+- Plano padrão (o que aparece na primeira instalação, antes de qualquer edição) agora vem em branco: 7 dias da semana (Segunda a Domingo, incluindo Domingo pela primeira vez), cada um com um único exercício placeholder "Exercício · 3x12" para o usuário substituir. Antes vinha pré-carregado com um plano de treino real de exemplo.
+- Adicionada cor própria para o card de Domingo.
+
 ## [0.4.0-beta] - 2026-08-22
 
 ### Alterado

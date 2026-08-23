@@ -5,7 +5,7 @@ import {
     diasDesde
 } from "./logica.js";
 
-const VERSAO_APP = "0.4.0-beta";
+const VERSAO_APP = "0.5.0-beta";
 const CHAVE_STORAGE = "treinoAppState";
 const CHAVE_ULTIMO_BACKUP = "treinoAppUltimoBackup";
 const DIAS_PARA_LEMBRAR_BACKUP = 14;
@@ -24,88 +24,63 @@ const DADOS_PADRAO = {
             dia: "Segunda-feira",
             classe: "seg",
             secoes: [
-                { titulo:"Atividades", itens:[
-                    { nome:"Yoga", reps:"1 hora" },
-                    { nome:"Caminhada", reps:"3 a 4 km" }
+                { titulo:"Exercícios", itens:[
+                    { id:"exercicio-segunda", nome:"Exercício", reps:"3x12" }
                 ]}
             ]
         },
         {
-            dia: "Terça-feira — Treino A (Peito + Tríceps + Estabilidade)",
+            dia: "Terça-feira",
             classe: "ter",
             secoes: [
-                { titulo:"Aquecimento", itens:[ { nome:"Caminhada leve", reps:"5 min" } ] },
                 { titulo:"Exercícios", itens:[
-                    { nome:"Supino Máquina", reps:"3x12" },
-                    { nome:"Peck Deck", reps:"3x12" },
-                    { nome:"Supino Inclinado Máquina", reps:"2x12" },
-                    { nome:"Tríceps Corda", reps:"3x12" },
-                    { nome:"Tríceps Barra na Polia", reps:"2x12" },
-                    { nome:"Face Pull", reps:"3x15" },
-                    { nome:"Prancha", reps:"3x20s" }
-                ]},
-                { titulo:"Cardio", itens:[ { nome:"Caminhada", reps:"15 min" } ] }
+                    { id:"exercicio-terca", nome:"Exercício", reps:"3x12" }
+                ]}
             ]
         },
         {
-            dia: "Quarta-feira — Treino B (Costas + Bíceps + Estabilidade)",
+            dia: "Quarta-feira",
             classe: "qua",
             secoes: [
-                { titulo:"Aquecimento", itens:[ { nome:"Caminhada leve", reps:"5 min" } ] },
                 { titulo:"Exercícios", itens:[
-                    { nome:"Puxada Frontal na Polia", reps:"3x12" },
-                    { nome:"Remada Baixa Sentada", reps:"3x12" },
-                    { nome:"Remada Máquina", reps:"2x12" },
-                    { nome:"Rosca Alternada Sentado", reps:"3x12" },
-                    { nome:"Rosca Martelo", reps:"2x12" },
-                    { nome:"Crucifixo Inverso Máquina", reps:"3x15" },
-                    { nome:"Bird Dog", reps:"3x10" }
-                ]},
-                { titulo:"Cardio", itens:[ { nome:"Caminhada", reps:"15 min" } ] }
+                    { id:"exercicio-quarta", nome:"Exercício", reps:"3x12" }
+                ]}
             ]
         },
         {
-            dia: "Quinta-feira — Treino C (Pernas)",
+            dia: "Quinta-feira",
             classe: "qui",
             secoes: [
-                { titulo:"Aquecimento", itens:[ { nome:"Caminhada leve", reps:"5 min" } ] },
                 { titulo:"Exercícios", itens:[
-                    { nome:"Leg Press 45°", reps:"3x15" },
-                    { nome:"Cadeira Extensora", reps:"3x15" },
-                    { nome:"Mesa Flexora", reps:"3x15" },
-                    { nome:"Cadeira Flexora", reps:"3x15" },
-                    { nome:"Glúteo Máquina", reps:"3x15" },
-                    { nome:"Panturrilha Sentada", reps:"4x15" },
-                    { nome:"Dead Bug", reps:"3x10" }
-                ]},
-                { titulo:"Cardio", itens:[ { nome:"Caminhada", reps:"15 min" } ] }
+                    { id:"exercicio-quinta", nome:"Exercício", reps:"3x12" }
+                ]}
             ]
         },
         {
             dia: "Sexta-feira",
             classe: "sex",
             secoes: [
-                { titulo:"Atividades", itens:[
-                    { nome:"Yoga", reps:"1 hora" },
-                    { nome:"Caminhada", reps:"3 a 4 km" }
+                { titulo:"Exercícios", itens:[
+                    { id:"exercicio-sexta", nome:"Exercício", reps:"3x12" }
                 ]}
             ]
         },
         {
-            dia: "Sábado — Treino D (Ombros + Core + Estabilidade)",
+            dia: "Sábado",
             classe: "sab",
             secoes: [
-                { titulo:"Aquecimento", itens:[ { nome:"Caminhada leve", reps:"5 min" } ] },
                 { titulo:"Exercícios", itens:[
-                    { nome:"Elevação Lateral", reps:"3x15" },
-                    { nome:"Crucifixo Inverso", reps:"3x15" },
-                    { nome:"Face Pull", reps:"3x15" },
-                    { nome:"Rotação Externa com Elástico", reps:"3x15" },
-                    { nome:"Rotação Externa na Polia", reps:"3x15" },
-                    { nome:"Prancha", reps:"3x30s" },
-                    { nome:"Bird Dog", reps:"3x10" }
-                ]},
-                { titulo:"Cardio", itens:[ { nome:"Caminhada", reps:"15 min" } ] }
+                    { id:"exercicio-sabado", nome:"Exercício", reps:"3x12" }
+                ]}
+            ]
+        },
+        {
+            dia: "Domingo",
+            classe: "dom",
+            secoes: [
+                { titulo:"Exercícios", itens:[
+                    { id:"exercicio-domingo", nome:"Exercício", reps:"3x12" }
+                ]}
             ]
         }
     ]

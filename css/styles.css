@@ -18,6 +18,7 @@
     --qui: #c67c1f;
     --sex: #2f9e6f;
     --sab: #7a5bd6;
+    --dom: #2f7dc6;
 
     --danger-soft-bg: #fbecea;
     --danger-soft-border: #f0c4bd;
@@ -193,6 +194,7 @@ body{
 .card.qui{ --dia-cor: var(--qui); }
 .card.sex{ --dia-cor: var(--sex); }
 .card.sab{ --dia-cor: var(--sab); }
+.card.dom{ --dia-cor: var(--dom); }
 
 .titulo{
     display:flex;
