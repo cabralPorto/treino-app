@@ -17,6 +17,9 @@
     --qui: #c67c1f;
     --sex: #2f9e6f;
     --sab: #7a5bd6;
+
+    --danger-soft-bg: #fbecea;
+    --danger-soft-border: #f0c4bd;
 }
 
 @media (prefers-color-scheme: dark){
@@ -31,6 +34,8 @@
         --danger: #e0685a;
         --danger-contrast: #1c0704;
         --shadow: 0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
+        --danger-soft-bg: #3a211d;
+        --danger-soft-border: #5c332c;
     }
 }
 
@@ -82,6 +87,23 @@ body{
     text-align:center;
 }
 
+.dica{
+    margin-top:2px;
+    color: var(--text-muted);
+    font-size:.78rem;
+    text-align:center;
+    font-style: italic;
+}
+
+.editavel{ cursor:pointer; border-radius:4px; }
+.editavel:hover{
+    text-decoration: underline dotted;
+    text-decoration-color: var(--text-muted);
+    text-underline-offset:3px;
+}
+
+.linha-editavel{ cursor:pointer; }
+
 .objetivo{
     margin-top: 14px;
     color: var(--text-muted);
@@ -90,7 +112,10 @@ body{
     text-align:center;
 }
 
-.objetivo:empty{ display:none; }
+.objetivo-vazio{
+    font-style: italic;
+    opacity:.75;
+}
 
 .objetivo strong{ color: var(--text); }
 
@@ -133,11 +158,21 @@ body{
 .card.sab{ --dia-cor: var(--sab); }
 
 .titulo{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
     padding: 16px 18px;
     font-size: 1.05rem;
     font-weight: 700;
     color: var(--text);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid transparent;
+    cursor:pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.card.aberto .titulo{
+    border-bottom-color: var(--border);
 }
 
 .titulo input{
@@ -146,8 +181,27 @@ body{
     font-weight: 700;
 }
 
+.dia-nome{ min-width:0; }
+
+.chevron{
+    width:18px;
+    height:18px;
+    flex:0 0 auto;
+    color: var(--text-muted);
+    transition: transform .2s ease;
+}
+
+.card.aberto .chevron{
+    transform: rotate(180deg);
+}
+
 .conteudo{
+    display:none;
     padding: 16px 18px;
+}
+
+.card.aberto .conteudo{
+    display:block;
 }
 
 .secao{
@@ -217,10 +271,12 @@ li:last-child{ border-bottom:none; }
 }
 
 .carga input.campo-kg{
-    width: 58px;
-    padding: 6px 4px;
+    width: 60px;
+    height: 34px;
+    padding: 6px 8px;
     font-size: 15px;
     text-align:center;
+    border-radius: 8px;
 }
 
 .carga-ultimo{
@@ -258,20 +314,34 @@ li input{
 li input.nome{ flex: 1 1 auto; }
 li input.reps{ width: 64px; flex: 0 0 auto; }
 
-.remover{
-    background: var(--danger);
-    color: var(--danger-contrast);
-    border:none;
-    border-radius:50%;
-    width:26px;
-    height:26px;
-    min-width:26px;
-    min-height:auto;
-    line-height:1;
+.linha-edicao{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:8px;
+    width:100%;
+}
+
+.excluir{
+    background: var(--danger-soft-bg);
+    color: var(--danger);
+    border: 1px solid var(--danger-soft-border);
+    border-radius: 8px;
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    min-height: auto;
+    padding: 0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex: 0 0 auto;
     cursor:pointer;
-    font-weight:bold;
-    padding:0;
-    font-size:.85rem;
+}
+
+.excluir svg{
+    width:16px;
+    height:16px;
 }
 
 .add-exercicio{
@@ -414,7 +484,9 @@ input, textarea{
 
 @media print{
     body{ background:#fff; padding:0; }
-    .toolbar{ display:none; }
+    .toolbar, .dica{ display:none; }
     .card{ box-shadow:none; break-inside: avoid; }
     .carga, .carga-historico{ display:none; }
+    .conteudo{ display:block !important; }
+    .chevron, .excluir, .add-exercicio{ display:none !important; }
 }

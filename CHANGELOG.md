@@ -3,6 +3,16 @@
 Todas as mudanças relevantes deste projeto são documentadas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/).
 
+## [0.2.0-beta] - 2026-08-22
+
+### Alterado
+- Interface reformulada com cara de app mobile: dias da semana viram um acordeão (só um aberto por vez, todos recolhidos ao carregar).
+- Removido o modo global "Editar/Salvar/Cancelar". Título, objetivo, nome do dia e nome/reps de cada exercício agora são editados direto na linha, com duplo clique, e salvam automaticamente ao sair do campo (Enter confirma, Esc cancela).
+- "+ Adicionar exercício" passa a ficar sempre visível no fim de cada lista, em vez de escondido atrás do modo de edição.
+- Botão de excluir exercício modernizado: quadrado pequeno, cantos arredondados, cor suave, ícone de lixeira — só aparece durante a edição da linha.
+- Campo de carga (kg) padronizado visualmente com os demais campos.
+- Impressão continua mostrando todos os dias expandidos, independente do que está aberto na tela.
+
 ## [0.1.0-beta] - 2026-08-22
 
 ### Adicionado

@@ -7,13 +7,16 @@ import {
     upsertCarga
 } from "./logica.js";
 
-const VERSAO_APP = "0.1.0-beta";
+const VERSAO_APP = "0.2.0-beta";
 const CHAVE_STORAGE = "treinoAppState";
 const CHAVE_ULTIMO_BACKUP = "treinoAppUltimoBackup";
 const DIAS_PARA_LEMBRAR_BACKUP = 14;
 const TAMANHO_MAX_IMPORT = 2 * 1024 * 1024; // 2MB
 
 const SECAO_COM_CARGA = "Exercícios";
+
+const ICONE_LIXEIRA = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>`;
+const ICONE_CHEVRON = `<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
 
 const DADOS_PADRAO = {
     titulo: "Plano de Treino",
@@ -130,78 +133,119 @@ function salvarEstado(){
 }
 
 let estado = carregarEstado();
-let rascunho = null;
-let modoEdicao = false;
-let eventoInstalacao = null;
-let avisoBackupDispensado = false;
+
+// Estado de interface (não persistido): o que está expandido/em edição agora.
+let diaExpandido = null;
+let diaEditandoNome = null;
+let editandoTitulo = false;
+let editandoObjetivo = false;
+let itemEditando = null; // "di-si-ii" ou null
 const historicoAberto = new Set();
 
-function dadosAtuais(){
-    return modoEdicao ? rascunho : estado;
+function renderizar(){
+    document.title = (estado.titulo || "Plano de Treino").replace(/[^\w\sÀ-ÿ()\-–—.,'"!?:/+]/g,"").trim() || "Plano de Treino";
+    renderizarHeader();
+    renderizarDias();
+    atualizarAvisoBackup();
 }
 
-function renderizar(){
-    const dados = dadosAtuais();
-
-    document.title = (dados.titulo || "Plano de Treino").replace(/[^\w\sÀ-ÿ()\-–—.,'"!?:/+]/g,"").trim() || "Plano de Treino";
-
+function renderizarHeader(){
     const headerTitulo = document.getElementById("headerTitulo");
     const headerObjetivo = document.getElementById("headerObjetivo");
 
-    if(modoEdicao){
-        headerTitulo.innerHTML = `<input type="text" id="campoTituloHeader" value="${escapeAttr(dados.titulo)}">`;
-        headerObjetivo.innerHTML = `
-            <strong>Objetivo:</strong>
-            <textarea id="campoObjetivo" rows="3" placeholder="Ex: ganhar força, emagrecer, manter a constância...">${escapeHtml(dados.objetivo)}</textarea>
-        `;
-        document.getElementById("campoTituloHeader").addEventListener("input", e=>{ rascunho.titulo = e.target.value; });
-        document.getElementById("campoObjetivo").addEventListener("input", e=>{ rascunho.objetivo = e.target.value; });
+    if(editandoTitulo){
+        headerTitulo.innerHTML = `<input type="text" id="campoTitulo" value="${escapeAttr(estado.titulo)}">`;
+        const input = document.getElementById("campoTitulo");
+        input.addEventListener("keydown", e=>{
+            if(e.key === "Enter") input.blur();
+            if(e.key === "Escape"){ editandoTitulo = false; renderizarHeader(); }
+        });
+        input.addEventListener("blur", () => {
+            if(!editandoTitulo) return;
+            estado.titulo = input.value.trim() || "Plano de Treino";
+            editandoTitulo = false;
+            salvarEstado();
+            renderizarHeader();
+        });
+        input.focus();
+        input.select();
     } else {
-        headerTitulo.innerHTML = `<h1>${escapeHtml(dados.titulo)}</h1>`;
-        headerObjetivo.innerHTML = dados.objetivo
-            ? `<strong>Objetivo:</strong> ${escapeHtml(dados.objetivo)}`
-            : "";
+        headerTitulo.innerHTML = `<h1 class="editavel" id="tituloTexto">${escapeHtml(estado.titulo)}</h1>`;
+        document.getElementById("tituloTexto").addEventListener("dblclick", () => {
+            editandoTitulo = true;
+            renderizarHeader();
+        });
     }
 
-    document.getElementById("btnEditar").hidden = modoEdicao;
-    document.getElementById("btnSalvar").hidden = !modoEdicao;
-    document.getElementById("btnCancelar").hidden = !modoEdicao;
+    if(editandoObjetivo){
+        headerObjetivo.innerHTML = `
+            <strong>Objetivo:</strong>
+            <textarea id="campoObjetivo" rows="3" placeholder="Ex: ganhar força, emagrecer, manter a constância...">${escapeHtml(estado.objetivo)}</textarea>
+        `;
+        const textarea = document.getElementById("campoObjetivo");
+        textarea.addEventListener("keydown", e=>{
+            if(e.key === "Escape"){ editandoObjetivo = false; renderizarHeader(); }
+        });
+        textarea.addEventListener("blur", () => {
+            if(!editandoObjetivo) return;
+            estado.objetivo = textarea.value.trim();
+            editandoObjetivo = false;
+            salvarEstado();
+            renderizarHeader();
+        });
+        textarea.focus();
+    } else {
+        headerObjetivo.innerHTML = estado.objetivo
+            ? `<strong>Objetivo:</strong> <span class="editavel" id="objetivoTexto">${escapeHtml(estado.objetivo)}</span>`
+            : `<span class="editavel objetivo-vazio" id="objetivoTexto">Toque duas vezes para definir um objetivo</span>`;
+        document.getElementById("objetivoTexto").addEventListener("dblclick", () => {
+            editandoObjetivo = true;
+            renderizarHeader();
+        });
+    }
+}
 
+function renderizarDias(){
     const container = document.getElementById("dias");
     container.innerHTML = "";
 
-    dados.dias.forEach((treino, di) => {
+    estado.dias.forEach((treino, di) => {
+        const aberto = di === diaExpandido;
         const card = document.createElement("div");
-        card.className = `card ${treino.classe || ""}`;
+        card.className = `card ${treino.classe || ""}${aberto ? " aberto" : ""}`;
 
-        let html = `<div class="titulo">`;
-        html += modoEdicao
-            ? `<input type="text" data-dia="${di}" class="campo-dia" value="${escapeAttr(treino.dia)}">`
-            : escapeHtml(treino.dia);
-        html += `</div><div class="conteudo">`;
+        const nomeDiaHtml = diaEditandoNome === di
+            ? `<input type="text" class="campo-dia-nome" value="${escapeAttr(treino.dia)}">`
+            : `<span class="dia-nome editavel">${escapeHtml(treino.dia)}</span>`;
+
+        let html = `<div class="titulo" data-dia="${di}" role="button" tabindex="0" aria-expanded="${aberto}">${nomeDiaHtml}${ICONE_CHEVRON}</div>`;
+        html += `<div class="conteudo">`;
 
         treino.secoes.forEach((secao, si) => {
-            const comCarga = !modoEdicao && secao.titulo === SECAO_COM_CARGA;
+            const comCarga = secao.titulo === SECAO_COM_CARGA;
             html += `<div class="secao"><h3>${escapeHtml(secao.titulo)}</h3><ul>`;
 
             secao.itens.forEach((item, ii) => {
-                if(modoEdicao){
+                const chave = `${di}-${si}-${ii}`;
+                if(itemEditando === chave){
                     html += `
-                        <li>
-                            <input type="text" class="nome campo-item" data-dia="${di}" data-secao="${si}" data-item="${ii}" data-campo="nome" value="${escapeAttr(item.nome)}">
-                            <input type="text" class="reps campo-item" data-dia="${di}" data-secao="${si}" data-item="${ii}" data-campo="reps" value="${escapeAttr(item.reps)}">
-                            <button class="remover" data-dia="${di}" data-secao="${si}" data-item="${ii}" title="Remover">✕</button>
+                        <li data-dia="${di}" data-secao="${si}" data-item="${ii}">
+                            <div class="linha-edicao">
+                                <input type="text" class="nome campo-nome" value="${escapeAttr(item.nome)}">
+                                <input type="text" class="reps campo-reps" value="${escapeAttr(item.reps)}">
+                                <button type="button" class="excluir" title="Excluir exercício">${ICONE_LIXEIRA}</button>
+                            </div>
                         </li>
                     `;
                 } else if(comCarga){
                     const registros = registrosDoExercicio(estado.cargas, item.id);
                     const registroHoje = registros.find(r=>r.data === hojeISO());
                     const ultimo = registros[0];
-                    const aberto = historicoAberto.has(item.id);
+                    const aberto2 = historicoAberto.has(item.id);
 
                     html += `
-                        <li>
-                            <div class="item-principal">
+                        <li data-dia="${di}" data-secao="${si}" data-item="${ii}">
+                            <div class="item-principal linha-editavel">
                                 <span class="item-nome">${escapeHtml(item.nome)}</span>
                                 <span class="badge">${escapeHtml(item.reps)}</span>
                             </div>
@@ -211,25 +255,25 @@ function renderizar(){
                                     value="${registroHoje ? registroHoje.peso : ""}">
                                 ${ultimo ? `<button type="button" class="carga-ultimo" data-toggle="${item.id}">último: ${ultimo.peso}kg</button>` : ""}
                             </div>
-                            ${aberto ? `<div class="carga-historico">${
+                            ${aberto2 ? `<div class="carga-historico">${
                                 registros.slice(0,5).map(r=>`<span>${r.data}: ${r.peso}kg</span>`).join("") || "Sem registros"
                             }</div>` : ""}
                         </li>
                     `;
                 } else {
                     html += `
-                        <li>
-                            <span class="item-nome">${escapeHtml(item.nome)}</span>
-                            <span class="badge">${escapeHtml(item.reps)}</span>
+                        <li data-dia="${di}" data-secao="${si}" data-item="${ii}">
+                            <div class="item-principal linha-editavel">
+                                <span class="item-nome">${escapeHtml(item.nome)}</span>
+                                <span class="badge">${escapeHtml(item.reps)}</span>
+                            </div>
                         </li>
                     `;
                 }
             });
 
             html += `</ul>`;
-            if(modoEdicao){
-                html += `<button class="add-exercicio" data-dia="${di}" data-secao="${si}">+ Adicionar exercício</button>`;
-            }
+            html += `<button type="button" class="add-exercicio" data-dia="${di}" data-secao="${si}">+ Adicionar exercício</button>`;
             html += `</div>`;
         });
 
@@ -238,54 +282,133 @@ function renderizar(){
         container.appendChild(card);
     });
 
-    if(modoEdicao){
-        container.querySelectorAll(".campo-dia").forEach(el=>{
-            el.addEventListener("input", e=>{
-                rascunho.dias[e.target.dataset.dia].dia = e.target.value;
-            });
+    ligarEventosDias(container);
+}
+
+function ligarEventosDias(container){
+    container.querySelectorAll(".titulo").forEach(tituloEl=>{
+        const di = Number(tituloEl.dataset.dia);
+
+        const alternar = () => {
+            if(diaEditandoNome === di) return;
+            diaExpandido = (diaExpandido === di) ? null : di;
+            renderizar();
+        };
+
+        tituloEl.addEventListener("click", alternar);
+        tituloEl.addEventListener("keydown", e=>{
+            if(e.key === "Enter" || e.key === " "){
+                e.preventDefault();
+                alternar();
+            }
         });
-        container.querySelectorAll(".campo-item").forEach(el=>{
-            el.addEventListener("input", e=>{
-                const {dia, secao, item, campo} = e.target.dataset;
-                rascunho.dias[dia].secoes[secao].itens[item][campo] = e.target.value;
-            });
-        });
-        container.querySelectorAll(".remover").forEach(el=>{
-            el.addEventListener("click", e=>{
-                const {dia, secao, item} = e.target.dataset;
-                rascunho.dias[dia].secoes[secao].itens.splice(item,1);
+
+        const nomeEl = tituloEl.querySelector(".dia-nome");
+        if(nomeEl){
+            nomeEl.addEventListener("dblclick", e=>{
+                e.stopPropagation();
+                diaEditandoNome = di;
                 renderizar();
             });
-        });
-        container.querySelectorAll(".add-exercicio").forEach(el=>{
-            el.addEventListener("click", e=>{
-                const {dia, secao} = e.target.dataset;
-                const idsExistentes = new Set();
-                rascunho.dias.forEach(d=>d.secoes.forEach(s=>s.itens.forEach(it=>idsExistentes.add(it.id))));
-                const novoId = gerarIdUnico("Novo exercício", idsExistentes);
-                rascunho.dias[dia].secoes[secao].itens.push({ id: novoId, nome:"Novo exercício", reps:"3x10" });
-                renderizar();
+        }
+
+        const inputNome = tituloEl.querySelector(".campo-dia-nome");
+        if(inputNome){
+            inputNome.addEventListener("click", e=> e.stopPropagation());
+            inputNome.addEventListener("keydown", e=>{
+                if(e.key === "Enter") inputNome.blur();
+                if(e.key === "Escape"){ diaEditandoNome = null; renderizar(); }
             });
-        });
-    } else {
-        container.querySelectorAll(".campo-kg").forEach(el=>{
-            el.addEventListener("change", e=>{
-                upsertCarga(estado.cargas, e.target.dataset.ex, e.target.value);
+            inputNome.addEventListener("blur", () => {
+                if(diaEditandoNome !== di) return;
+                estado.dias[di].dia = inputNome.value.trim() || estado.dias[di].dia;
+                diaEditandoNome = null;
                 salvarEstado();
                 renderizar();
             });
+            inputNome.focus();
+            inputNome.select();
+        }
+    });
+
+    container.querySelectorAll(".item-principal.linha-editavel").forEach(el=>{
+        el.addEventListener("dblclick", () => {
+            const li = el.closest("li");
+            itemEditando = `${li.dataset.dia}-${li.dataset.secao}-${li.dataset.item}`;
+            renderizar();
         });
-        container.querySelectorAll(".carga-ultimo").forEach(el=>{
-            el.addEventListener("click", e=>{
-                const id = e.target.dataset.toggle;
-                if(historicoAberto.has(id)) historicoAberto.delete(id);
-                else historicoAberto.add(id);
-                renderizar();
+    });
+
+    container.querySelectorAll("li .linha-edicao").forEach(linha=>{
+        const li = linha.closest("li");
+        const { dia, secao, item } = li.dataset;
+        const chave = `${dia}-${secao}-${item}`;
+        const nomeInput = linha.querySelector(".campo-nome");
+        const repsInput = linha.querySelector(".campo-reps");
+
+        function commit(){
+            if(itemEditando !== chave) return;
+            estado.dias[dia].secoes[secao].itens[item].nome = nomeInput.value.trim();
+            estado.dias[dia].secoes[secao].itens[item].reps = repsInput.value.trim();
+            itemEditando = null;
+            salvarEstado();
+            renderizar();
+        }
+
+        [nomeInput, repsInput].forEach(input=>{
+            input.addEventListener("keydown", e=>{
+                if(e.key === "Enter") input.blur();
+                if(e.key === "Escape"){ itemEditando = null; renderizar(); }
             });
         });
-    }
 
-    atualizarAvisoBackup();
+        li.addEventListener("focusout", e=>{
+            if(itemEditando !== chave) return;
+            if(li.contains(e.relatedTarget)) return;
+            commit();
+        });
+
+        linha.querySelector(".excluir").addEventListener("click", () => {
+            estado.dias[dia].secoes[secao].itens.splice(item, 1);
+            itemEditando = null;
+            salvarEstado();
+            renderizar();
+        });
+
+        nomeInput.focus();
+        nomeInput.select();
+    });
+
+    container.querySelectorAll(".campo-kg").forEach(el=>{
+        el.addEventListener("change", e=>{
+            upsertCarga(estado.cargas, e.target.dataset.ex, e.target.value);
+            salvarEstado();
+            renderizar();
+        });
+    });
+
+    container.querySelectorAll(".carga-ultimo").forEach(el=>{
+        el.addEventListener("click", e=>{
+            const id = e.target.dataset.toggle;
+            if(historicoAberto.has(id)) historicoAberto.delete(id);
+            else historicoAberto.add(id);
+            renderizar();
+        });
+    });
+
+    container.querySelectorAll(".add-exercicio").forEach(btn=>{
+        btn.addEventListener("click", e=>{
+            const { dia, secao } = e.currentTarget.dataset;
+            const idsExistentes = new Set();
+            estado.dias.forEach(d=>d.secoes.forEach(s=>s.itens.forEach(it=>idsExistentes.add(it.id))));
+            const novoId = gerarIdUnico("Novo exercício", idsExistentes);
+            const lista = estado.dias[dia].secoes[secao].itens;
+            lista.push({ id: novoId, nome:"Novo exercício", reps:"3x10" });
+            salvarEstado();
+            itemEditando = `${dia}-${secao}-${lista.length - 1}`;
+            renderizar();
+        });
+    });
 }
 
 function escapeHtml(texto){
@@ -310,7 +433,7 @@ function atualizarAvisoBackup(){
     const aviso = document.getElementById("avisoBackup");
     if(!aviso) return;
 
-    if(avisoBackupDispensado || modoEdicao || estado.cargas.length === 0){
+    if(avisoBackupDispensado || estado.cargas.length === 0){
         aviso.hidden = true;
         return;
     }
@@ -320,28 +443,11 @@ function atualizarAvisoBackup(){
     aviso.hidden = !precisaAvisar;
 }
 
-document.getElementById("btnEditar").addEventListener("click", () => {
-    rascunho = JSON.parse(JSON.stringify(estado));
-    modoEdicao = true;
-    renderizar();
-});
-
-document.getElementById("btnCancelar").addEventListener("click", () => {
-    rascunho = null;
-    modoEdicao = false;
-    renderizar();
-});
-
-document.getElementById("btnSalvar").addEventListener("click", () => {
-    estado = normalizarDados(rascunho);
-    rascunho = null;
-    modoEdicao = false;
-    salvarEstado();
-    renderizar();
-});
+let avisoBackupDispensado = false;
+let eventoInstalacao = null;
 
 document.getElementById("btnExportar").addEventListener("click", () => {
-    const blob = new Blob([JSON.stringify(dadosAtuais(), null, 2)], {type:"application/json"});
+    const blob = new Blob([JSON.stringify(estado, null, 2)], {type:"application/json"});
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -374,8 +480,8 @@ document.getElementById("inputImportar").addEventListener("change", (e) => {
             const novo = JSON.parse(leitor.result);
             if(!novo.dias || !Array.isArray(novo.dias)) throw new Error("Formato inválido");
             estado = normalizarDados(novo);
-            rascunho = null;
-            modoEdicao = false;
+            diaExpandido = null;
+            itemEditando = null;
             salvarEstado();
             renderizar();
             mostrarToast("Plano importado com sucesso!");
