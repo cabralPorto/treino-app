@@ -1,7 +1,7 @@
 {
   "name": "Plano de Treino",
   "short_name": "Treino",
-  "description": "Plano de treino semanal com registro de carga por exercício.",
+  "description": "Plano de treino semanal com dias, exercícios e repetições.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

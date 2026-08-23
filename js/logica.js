@@ -53,12 +53,6 @@ export function normalizarDados(bruto){
         });
     });
 
-    dados.cargas = Array.isArray(dados.cargas)
-        ? dados.cargas
-            .filter(c => c && typeof c.exercicioId === "string" && typeof c.data === "string" && !Number.isNaN(Number(c.peso)))
-            .map(c=>({ exercicioId: c.exercicioId, data: c.data, peso: Number(c.peso) }))
-        : [];
-
     dados.versao = VERSAO_ATUAL;
     return dados;
 }
@@ -77,26 +71,3 @@ export function diasDesde(dataISO){
     return Math.round((hoje - entao) / 86400000);
 }
 
-export function registrosDoExercicio(cargas, exercicioId){
-    return cargas
-        .filter(c=>c.exercicioId === exercicioId)
-        .sort((a,b)=> a.data < b.data ? 1 : (a.data > b.data ? -1 : 0));
-}
-
-export function upsertCarga(cargas, exercicioId, pesoTexto, data = hojeISO()){
-    const idx = cargas.findIndex(c=>c.exercicioId === exercicioId && c.data === data);
-    const pesoTrim = (pesoTexto ?? "").toString().trim();
-
-    if(pesoTrim === ""){
-        if(idx >= 0) cargas.splice(idx,1);
-        return cargas;
-    }
-
-    const peso = Number(pesoTrim.replace(",", "."));
-    if(Number.isNaN(peso)) return cargas;
-
-    if(idx >= 0) cargas[idx].peso = peso;
-    else cargas.push({ exercicioId, data, peso });
-
-    return cargas;
-}

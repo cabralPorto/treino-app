@@ -2,12 +2,10 @@ import {
     normalizarDados,
     gerarIdUnico,
     hojeISO,
-    diasDesde,
-    registrosDoExercicio,
-    upsertCarga
+    diasDesde
 } from "./logica.js";
 
-const VERSAO_APP = "0.2.0-beta";
+const VERSAO_APP = "0.3.0-beta";
 const CHAVE_STORAGE = "treinoAppState";
 const CHAVE_ULTIMO_BACKUP = "treinoAppUltimoBackup";
 const DIAS_PARA_LEMBRAR_BACKUP = 14;
@@ -110,8 +108,7 @@ const DADOS_PADRAO = {
                 { titulo:"Cardio", itens:[ { nome:"Caminhada", reps:"15 min" } ] }
             ]
         }
-    ],
-    cargas: []
+    ]
 };
 
 function carregarEstado(){
@@ -140,7 +137,6 @@ let diaEditandoNome = null;
 let editandoTitulo = false;
 let editandoObjetivo = false;
 let itemEditando = null; // "di-si-ii" ou null
-const historicoAberto = new Set();
 
 function renderizar(){
     document.title = (estado.titulo || "Plano de Treino").replace(/[^\w\sÀ-ÿ()\-–—.,'"!?:/+]/g,"").trim() || "Plano de Treino";
@@ -222,7 +218,6 @@ function renderizarDias(){
         html += `<div class="conteudo">`;
 
         treino.secoes.forEach((secao, si) => {
-            const comCarga = secao.titulo === SECAO_COM_CARGA;
             html += `<div class="secao"><h3>${escapeHtml(secao.titulo)}</h3><ul>`;
 
             secao.itens.forEach((item, ii) => {
@@ -237,29 +232,6 @@ function renderizarDias(){
                             </div>
                         </li>
                     `;
-                } else if(comCarga){
-                    const registros = registrosDoExercicio(estado.cargas, item.id);
-                    const registroHoje = registros.find(r=>r.data === hojeISO());
-                    const ultimo = registros[0];
-                    const aberto2 = historicoAberto.has(item.id);
-
-                    html += `
-                        <li data-dia="${di}" data-secao="${si}" data-item="${ii}">
-                            <div class="item-principal linha-editavel">
-                                <span class="item-nome">${escapeHtml(item.nome)}</span>
-                                <span class="badge">${escapeHtml(item.reps)}</span>
-                            </div>
-                            <div class="carga">
-                                <input type="number" inputmode="decimal" step="0.5" min="0" placeholder="kg"
-                                    class="campo-kg" data-ex="${item.id}"
-                                    value="${registroHoje ? registroHoje.peso : ""}">
-                                ${ultimo ? `<button type="button" class="carga-ultimo" data-toggle="${item.id}">último: ${ultimo.peso}kg</button>` : ""}
-                            </div>
-                            ${aberto2 ? `<div class="carga-historico">${
-                                registros.slice(0,5).map(r=>`<span>${r.data}: ${r.peso}kg</span>`).join("") || "Sem registros"
-                            }</div>` : ""}
-                        </li>
-                    `;
                 } else {
                     html += `
                         <li data-dia="${di}" data-secao="${si}" data-item="${ii}">
@@ -272,10 +244,12 @@ function renderizarDias(){
                 }
             });
 
-            html += `</ul>`;
-            html += `<button type="button" class="add-exercicio" data-dia="${di}" data-secao="${si}">+ Adicionar exercício</button>`;
-            html += `</div>`;
+            html += `</ul></div>`;
         });
+
+        let indiceSecaoAlvo = treino.secoes.findIndex(s => s.titulo === SECAO_COM_CARGA);
+        if(indiceSecaoAlvo === -1) indiceSecaoAlvo = treino.secoes.length - 1;
+        html += `<button type="button" class="add-exercicio" data-dia="${di}" data-secao="${indiceSecaoAlvo}">+ Adicionar exercício</button>`;
 
         html += `</div>`;
         card.innerHTML = html;
@@ -379,23 +353,6 @@ function ligarEventosDias(container){
         nomeInput.select();
     });
 
-    container.querySelectorAll(".campo-kg").forEach(el=>{
-        el.addEventListener("change", e=>{
-            upsertCarga(estado.cargas, e.target.dataset.ex, e.target.value);
-            salvarEstado();
-            renderizar();
-        });
-    });
-
-    container.querySelectorAll(".carga-ultimo").forEach(el=>{
-        el.addEventListener("click", e=>{
-            const id = e.target.dataset.toggle;
-            if(historicoAberto.has(id)) historicoAberto.delete(id);
-            else historicoAberto.add(id);
-            renderizar();
-        });
-    });
-
     container.querySelectorAll(".add-exercicio").forEach(btn=>{
         btn.addEventListener("click", e=>{
             const { dia, secao } = e.currentTarget.dataset;
@@ -433,7 +390,7 @@ function atualizarAvisoBackup(){
     const aviso = document.getElementById("avisoBackup");
     if(!aviso) return;
 
-    if(avisoBackupDispensado || estado.cargas.length === 0){
+    if(avisoBackupDispensado){
         aviso.hidden = true;
         return;
     }

@@ -7,8 +7,6 @@ import {
     normalizarDados,
     hojeISO,
     diasDesde,
-    registrosDoExercicio,
-    upsertCarga,
     MAX_DIAS,
     MAX_ITENS_POR_SECAO
 } from "../js/logica.js";
@@ -45,7 +43,6 @@ test("normalizarDados converte itens no formato antigo [nome, reps] para objetos
     assert.equal(item.reps, "3x12");
     assert.equal(typeof item.id, "string");
     assert.ok(item.id.length > 0);
-    assert.deepEqual(novo.cargas, []);
 });
 
 test("normalizarDados preserva ids já existentes e gera novos só quando faltam ou colidem", () => {
@@ -78,21 +75,6 @@ test("normalizarDados limita quantidade de dias e itens por seção", () => {
     assert.equal(novoItens.dias[0].secoes[0].itens.length, MAX_ITENS_POR_SECAO);
 });
 
-test("normalizarDados ignora entradas de carga malformadas", () => {
-    const bruto = {
-        dias: [],
-        cargas: [
-            { exercicioId: "x", data: "2026-08-01", peso: 20 },
-            { exercicioId: "x", data: "2026-08-02", peso: "abc" },
-            { exercicioId: "x" },
-            null
-        ]
-    };
-    const novo = normalizarDados(bruto);
-    assert.equal(novo.cargas.length, 1);
-    assert.equal(novo.cargas[0].peso, 20);
-});
-
 test("hojeISO retorna data no formato AAAA-MM-DD", () => {
     assert.match(hojeISO(), /^\d{4}-\d{2}-\d{2}$/);
 });
@@ -102,45 +84,4 @@ test("diasDesde calcula a diferença correta em dias", () => {
     const dez = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() - 10);
     const iso = `${dez.getFullYear()}-${String(dez.getMonth()+1).padStart(2,"0")}-${String(dez.getDate()).padStart(2,"0")}`;
     assert.equal(diasDesde(iso), 10);
-});
-
-test("upsertCarga adiciona um novo registro quando não existe para o dia", () => {
-    const cargas = [];
-    upsertCarga(cargas, "supino", "20", "2026-08-01");
-    assert.equal(cargas.length, 1);
-    assert.equal(cargas[0].peso, 20);
-});
-
-test("upsertCarga atualiza (não duplica) quando já existe registro no mesmo dia", () => {
-    const cargas = [{ exercicioId: "supino", data: "2026-08-01", peso: 20 }];
-    upsertCarga(cargas, "supino", "22.5", "2026-08-01");
-    assert.equal(cargas.length, 1);
-    assert.equal(cargas[0].peso, 22.5);
-});
-
-test("upsertCarga remove o registro do dia quando o valor é limpo", () => {
-    const cargas = [{ exercicioId: "supino", data: "2026-08-01", peso: 20 }];
-    upsertCarga(cargas, "supino", "", "2026-08-01");
-    assert.equal(cargas.length, 0);
-});
-
-test("upsertCarga aceita vírgula decimal e ignora valores inválidos", () => {
-    const cargas = [];
-    upsertCarga(cargas, "supino", "22,5", "2026-08-01");
-    assert.equal(cargas[0].peso, 22.5);
-
-    upsertCarga(cargas, "supino", "abc", "2026-08-02");
-    assert.equal(cargas.length, 1);
-});
-
-test("registrosDoExercicio filtra por exercício e ordena do mais recente pro mais antigo", () => {
-    const cargas = [
-        { exercicioId: "supino", data: "2026-08-01", peso: 18 },
-        { exercicioId: "supino", data: "2026-08-10", peso: 22 },
-        { exercicioId: "remada", data: "2026-08-05", peso: 30 }
-    ];
-    const registros = registrosDoExercicio(cargas, "supino");
-    assert.equal(registros.length, 2);
-    assert.equal(registros[0].data, "2026-08-10");
-    assert.equal(registros[1].data, "2026-08-01");
 });

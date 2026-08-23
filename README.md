@@ -1,6 +1,6 @@
 # Plano de Treino
 
-App de treino instalável (PWA) — organize sua semana de treino, registre a carga usada em cada exercício e acompanhe sua evolução. **Status: beta (v0.1.0-beta).**
+App de treino instalável (PWA) — organize sua semana de treino, com exercícios, séries e repetições. **Status: beta (v0.1.0-beta).**
 
 🔗 **App:** https://cabralporto.github.io/treino-app/
 
@@ -9,7 +9,6 @@ App de treino instalável (PWA) — organize sua semana de treino, registre a ca
 ## Recursos
 
 - Plano de treino semanal editável (dias, seções, exercícios).
-- Registro de carga (kg) por exercício, com histórico das últimas sessões.
 - Exportar/Importar o plano em JSON (serve como backup e para levar seus dados para outro aparelho).
 - Instalável na tela inicial do celular, funciona offline depois de instalado.
 - Modo claro/escuro automático.

@@ -3,6 +3,14 @@
 Todas as mudanças relevantes deste projeto são documentadas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/).
 
+## [0.3.0-beta] - 2026-08-22
+
+### Corrigido
+- "+ Adicionar exercício" aparecia uma vez por seção (Aquecimento/Exercícios/Cardio); agora aparece uma única vez, no fim da lista completa de cada dia.
+
+### Removido
+- Removido o registro de carga (kg) por exercício: sem mais campo de peso, histórico de sessões ou aviso de backup atrelado a esses dados. O plano volta a ser só dias, exercícios e repetições.
+
 ## [0.2.0-beta] - 2026-08-22
 
 ### Alterado

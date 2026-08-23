@@ -263,43 +263,6 @@ li:last-child{ border-bottom:none; }
     flex: 0 0 auto;
 }
 
-.carga{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    flex: 0 0 auto;
-}
-
-.carga input.campo-kg{
-    width: 60px;
-    height: 34px;
-    padding: 6px 8px;
-    font-size: 15px;
-    text-align:center;
-    border-radius: 8px;
-}
-
-.carga-ultimo{
-    background:none;
-    border:none;
-    color: var(--accent);
-    font-size: .78rem;
-    font-weight: 600;
-    padding: 4px 2px;
-    min-height:auto;
-    cursor:pointer;
-}
-
-.carga-historico{
-    flex-basis: 100%;
-    padding: 8px 0 4px;
-    font-size: .82rem;
-    color: var(--text-muted);
-    display:flex;
-    flex-wrap:wrap;
-    gap: 6px 14px;
-}
-
 li input{
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -486,7 +449,6 @@ input, textarea{
     body{ background:#fff; padding:0; }
     .toolbar, .dica{ display:none; }
     .card{ box-shadow:none; break-inside: avoid; }
-    .carga, .carga-historico{ display:none; }
     .conteudo{ display:block !important; }
     .chevron, .excluir, .add-exercicio{ display:none !important; }
 }
