@@ -30,17 +30,44 @@
 <div class="container">
 
     <header class="header">
-        <div class="header-titulo" id="headerTitulo"></div>
-        <p class="tagline">Organize sua semana de treino: dias, exercícios, séries e repetições.</p>
-        <p class="dica">Toque duas vezes em qualquer texto para editar.</p>
+        <div class="header-top">
+            <div class="header-emblema" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2.5" y="9" width="2.6" height="6" rx="1"></rect>
+                    <rect x="18.9" y="9" width="2.6" height="6" rx="1"></rect>
+                    <rect x="5.6" y="7" width="2.2" height="10" rx="1"></rect>
+                    <rect x="16.2" y="7" width="2.2" height="10" rx="1"></rect>
+                    <line x1="7.8" y1="12" x2="16.2" y2="12"></line>
+                </svg>
+            </div>
+            <div class="header-titulo-bloco">
+                <div class="header-eyebrow">Seu plano</div>
+                <div class="header-titulo" id="headerTitulo"></div>
+            </div>
+        </div>
+
+        <div class="header-divisor"></div>
+
         <div class="objetivo" id="headerObjetivo"></div>
 
         <div class="toolbar">
-            <button id="btnExportar">Exportar JSON</button>
-            <button id="btnImportar">Importar JSON</button>
+            <button id="btnExportar">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"></path><path d="M7.5 10.5 12 15l4.5-4.5"></path><path d="M4 16.5v2A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5v-2"></path></svg>
+                Exportar
+            </button>
+            <button id="btnImportar">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"></path><path d="M7.5 8.5 12 4l4.5 4.5"></path><path d="M4 16.5v2A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5v-2"></path></svg>
+                Importar
+            </button>
             <input type="file" id="inputImportar" accept="application/json" hidden>
-            <button id="btnImprimir">Imprimir</button>
-            <button id="btnInstalar" class="primario" hidden>Instalar app</button>
+            <button id="btnImprimir">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V4h12v5"></path><rect x="4" y="9" width="16" height="8" rx="1.5"></rect><path d="M6 14h12v6H6z"></path></svg>
+                Imprimir
+            </button>
+            <button id="btnInstalar" class="primario" hidden>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2"></rect><line x1="10.5" y1="18.2" x2="13.5" y2="18.2"></line><path d="M12 8v5"></path><path d="M9.8 11.2 12 13.4l2.2-2.2"></path></svg>
+                Instalar app
+            </button>
         </div>
     </header>
 

@@ -3,6 +3,12 @@
 Todas as mudanças relevantes deste projeto são documentadas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/).
 
+## [0.4.0-beta] - 2026-08-22
+
+### Alterado
+- Cabeçalho redesenhado: emblema com ícone, rótulo "Seu plano" acima do título, divisor fino e os botões da barra de ferramentas viram chips com ícone (Exportar/Importar/Imprimir/Instalar app). Removidos a tagline e o aviso genérico "toque duas vezes em qualquer texto" — o hint de objetivo continua ativando a edição por duplo clique.
+- Lista de exercícios padronizada em todos os dias: cada seção ganha um título com linha fina ao lado, e os itens de qualquer seção com mais de um exercício recebem numeração (1, 2, 3...). Seções com um único item (ex.: Aquecimento) não são numeradas.
+
 ## [0.3.0-beta] - 2026-08-22
 
 ### Corrigido

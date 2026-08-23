@@ -5,6 +5,7 @@
     --text: #1c2126;
     --text-muted: #5b6470;
     --accent: #1b6b6b;
+    --accent-tint: #e3efee;
     --accent-contrast: #ffffff;
     --danger: #c0392b;
     --danger-contrast: #ffffff;
@@ -30,6 +31,7 @@
         --text: #eceef0;
         --text-muted: #9aa4ae;
         --accent: #4fb3b3;
+        --accent-tint: #1c3433;
         --accent-contrast: #0c1416;
         --danger: #e0685a;
         --danger-contrast: #1c0704;
@@ -67,32 +69,55 @@ body{
     margin-bottom: 24px;
 }
 
+.header-top{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.header-emblema{
+    flex:0 0 auto;
+    width:44px;
+    height:44px;
+    border-radius:12px;
+    background: var(--accent-tint);
+    color: var(--accent);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.header-titulo-bloco{
+    min-width:0;
+    flex:1 1 auto;
+}
+
+.header-eyebrow{
+    font-size:.68rem;
+    font-weight:700;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color: var(--accent);
+}
+
 .header-titulo h1{
-    font-size: clamp(1.3rem, 4vw, 1.8rem);
-    font-weight: 700;
-    text-align:center;
+    margin-top:2px;
+    font-size: clamp(1.2rem, 4vw, 1.6rem);
+    font-weight: 800;
+    line-height:1.15;
 }
 
 .header-titulo input{
     width:100%;
-    font-size: clamp(1.1rem, 4vw, 1.5rem);
-    font-weight: 700;
-    text-align:center;
-}
-
-.tagline{
-    margin-top: 6px;
-    color: var(--text-muted);
-    font-size: .9rem;
-    text-align:center;
-}
-
-.dica{
     margin-top:2px;
-    color: var(--text-muted);
-    font-size:.78rem;
-    text-align:center;
-    font-style: italic;
+    font-size: clamp(1.05rem, 4vw, 1.4rem);
+    font-weight: 800;
+}
+
+.header-divisor{
+    height:1px;
+    background: var(--border);
+    margin: 16px 0 14px;
 }
 
 .editavel{ cursor:pointer; border-radius:4px; }
@@ -105,11 +130,9 @@ body{
 .linha-editavel{ cursor:pointer; }
 
 .objetivo{
-    margin-top: 14px;
     color: var(--text-muted);
-    font-size: .95rem;
+    font-size: .9rem;
     line-height: 1.5;
-    text-align:center;
 }
 
 .objetivo-vazio{
@@ -130,9 +153,23 @@ body{
 .toolbar{
     display:flex;
     flex-wrap:wrap;
-    justify-content:center;
     gap:8px;
-    margin-top:20px;
+    margin-top:16px;
+}
+
+.toolbar button{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+}
+
+.toolbar button svg{
+    flex:0 0 auto;
+    color: var(--text-muted);
+}
+
+.toolbar button.primario svg{
+    color: var(--accent-contrast);
 }
 
 .dias{
@@ -212,13 +249,26 @@ body{
     margin-bottom: 0;
 }
 
-.secao h3{
+.secao-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom: 8px;
+}
+
+.secao-titulo{
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: .04em;
-    margin-bottom: 8px;
-    font-size: .78rem;
+    letter-spacing: .05em;
+    font-size: .74rem;
     font-weight: 700;
+    white-space:nowrap;
+}
+
+.secao-linha{
+    flex: 1 1 auto;
+    height:1px;
+    background: var(--border);
 }
 
 ul{ list-style:none; }
@@ -229,7 +279,7 @@ li{
     justify-content:space-between;
     align-items:center;
     gap:8px;
-    padding: 9px 0;
+    padding: 11px 0;
     border-bottom: 1px solid var(--border);
 }
 
@@ -238,17 +288,32 @@ li:last-child{ border-bottom:none; }
 .item-principal{
     display:flex;
     flex: 1 1 auto;
-    justify-content:space-between;
     align-items:center;
-    gap:8px;
+    gap:10px;
     min-width: 0;
 }
 
 .item-nome{
+    flex: 1 1 auto;
     min-width:0;
     overflow:hidden;
     text-overflow:ellipsis;
     white-space:nowrap;
+    font-weight:700;
+}
+
+.numero{
+    flex:0 0 auto;
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    border:1px solid var(--border);
+    color: var(--text-muted);
+    font-size:.72rem;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
 .badge{
@@ -447,7 +512,7 @@ input, textarea{
 
 @media print{
     body{ background:#fff; padding:0; }
-    .toolbar, .dica{ display:none; }
+    .toolbar{ display:none; }
     .card{ box-shadow:none; break-inside: avoid; }
     .conteudo{ display:block !important; }
     .chevron, .excluir, .add-exercicio{ display:none !important; }

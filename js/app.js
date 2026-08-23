@@ -5,7 +5,7 @@ import {
     diasDesde
 } from "./logica.js";
 
-const VERSAO_APP = "0.3.0-beta";
+const VERSAO_APP = "0.4.0-beta";
 const CHAVE_STORAGE = "treinoAppState";
 const CHAVE_ULTIMO_BACKUP = "treinoAppUltimoBackup";
 const DIAS_PARA_LEMBRAR_BACKUP = 14;
@@ -218,7 +218,10 @@ function renderizarDias(){
         html += `<div class="conteudo">`;
 
         treino.secoes.forEach((secao, si) => {
-            html += `<div class="secao"><h3>${escapeHtml(secao.titulo)}</h3><ul>`;
+            const numerar = secao.itens.length > 1;
+            html += `<div class="secao">`;
+            html += `<div class="secao-head"><span class="secao-titulo">${escapeHtml(secao.titulo)}</span><div class="secao-linha"></div></div>`;
+            html += `<ul>`;
 
             secao.itens.forEach((item, ii) => {
                 const chave = `${di}-${si}-${ii}`;
@@ -233,9 +236,11 @@ function renderizarDias(){
                         </li>
                     `;
                 } else {
+                    const numeroHtml = numerar ? `<span class="numero">${ii + 1}</span>` : "";
                     html += `
                         <li data-dia="${di}" data-secao="${si}" data-item="${ii}">
                             <div class="item-principal linha-editavel">
+                                ${numeroHtml}
                                 <span class="item-nome">${escapeHtml(item.nome)}</span>
                                 <span class="badge">${escapeHtml(item.reps)}</span>
                             </div>
