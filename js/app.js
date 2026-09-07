@@ -5,7 +5,7 @@ import {
     diasDesde
 } from "./logica.js";
 
-const VERSAO_APP = "0.5.0-beta";
+const VERSAO_APP = "0.6.0-beta";
 const CHAVE_STORAGE = "treinoAppState";
 const CHAVE_ULTIMO_BACKUP = "treinoAppUltimoBackup";
 const DIAS_PARA_LEMBRAR_BACKUP = 14;
@@ -445,7 +445,7 @@ window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
     eventoInstalacao = e;
     const btn = document.getElementById("btnInstalar");
-    if(btn) btn.hidden = false;
+    if(btn && !ehStandalone()) btn.hidden = false;
 });
 
 document.getElementById("btnInstalar")?.addEventListener("click", async () => {
@@ -460,6 +460,44 @@ window.addEventListener("appinstalled", () => {
     const btn = document.getElementById("btnInstalar");
     if(btn) btn.hidden = true;
     eventoInstalacao = null;
+});
+
+function ehStandalone(){
+    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+}
+
+if(ehStandalone()){
+    const btn = document.getElementById("btnInstalar");
+    if(btn) btn.hidden = true;
+}
+
+const btnMenu = document.getElementById("btnMenu");
+const menuDropdown = document.getElementById("menuDropdown");
+
+function fecharMenu(){
+    menuDropdown.hidden = true;
+    btnMenu.setAttribute("aria-expanded", "false");
+}
+
+btnMenu?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const abrindo = menuDropdown.hidden;
+    menuDropdown.hidden = !abrindo;
+    btnMenu.setAttribute("aria-expanded", String(abrindo));
+});
+
+menuDropdown?.addEventListener("click", (e) => {
+    if(e.target.closest(".item-menu")) fecharMenu();
+});
+
+document.addEventListener("click", (e) => {
+    if(!menuDropdown || menuDropdown.hidden) return;
+    if(e.target.closest(".menu-wrap")) return;
+    fecharMenu();
+});
+
+document.addEventListener("keydown", (e) => {
+    if(e.key === "Escape" && menuDropdown && !menuDropdown.hidden) fecharMenu();
 });
 
 const elVersao = document.getElementById("appVersao");

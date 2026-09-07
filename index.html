@@ -44,31 +44,34 @@
                 <div class="header-eyebrow">Seu plano</div>
                 <div class="header-titulo" id="headerTitulo"></div>
             </div>
+            <button type="button" id="btnInstalar" class="icone-btn instalar" hidden title="Instalar app" aria-label="Instalar app">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2"></rect><line x1="10.5" y1="18.2" x2="13.5" y2="18.2"></line><path d="M12 8v5"></path><path d="M9.8 11.2 12 13.4l2.2-2.2"></path></svg>
+            </button>
+            <div class="menu-wrap">
+                <button type="button" id="btnMenu" class="icone-btn" aria-haspopup="true" aria-expanded="false" aria-label="Mais opções">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg>
+                </button>
+                <div class="menu-dropdown" id="menuDropdown" hidden>
+                    <button type="button" id="btnExportar" class="item-menu">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"></path><path d="M7.5 10.5 12 15l4.5-4.5"></path><path d="M4 16.5v2A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5v-2"></path></svg>
+                        Exportar
+                    </button>
+                    <button type="button" id="btnImportar" class="item-menu">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"></path><path d="M7.5 8.5 12 4l4.5 4.5"></path><path d="M4 16.5v2A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5v-2"></path></svg>
+                        Importar
+                    </button>
+                    <input type="file" id="inputImportar" accept="application/json" hidden>
+                    <button type="button" id="btnImprimir" class="item-menu">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V4h12v5"></path><rect x="4" y="9" width="16" height="8" rx="1.5"></rect><path d="M6 14h12v6H6z"></path></svg>
+                        Imprimir
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div class="header-divisor"></div>
 
         <div class="objetivo" id="headerObjetivo"></div>
-
-        <div class="toolbar">
-            <button id="btnExportar">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"></path><path d="M7.5 10.5 12 15l4.5-4.5"></path><path d="M4 16.5v2A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5v-2"></path></svg>
-                Exportar
-            </button>
-            <button id="btnImportar">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"></path><path d="M7.5 8.5 12 4l4.5 4.5"></path><path d="M4 16.5v2A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5v-2"></path></svg>
-                Importar
-            </button>
-            <input type="file" id="inputImportar" accept="application/json" hidden>
-            <button id="btnImprimir">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V4h12v5"></path><rect x="4" y="9" width="16" height="8" rx="1.5"></rect><path d="M6 14h12v6H6z"></path></svg>
-                Imprimir
-            </button>
-            <button id="btnInstalar" class="primario" hidden>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2"></rect><line x1="10.5" y1="18.2" x2="13.5" y2="18.2"></line><path d="M12 8v5"></path><path d="M9.8 11.2 12 13.4l2.2-2.2"></path></svg>
-                Instalar app
-            </button>
-        </div>
     </header>
 
     <div id="avisoBackup" class="aviso-backup" hidden>
@@ -82,7 +85,6 @@
     <main class="dias" id="dias"></main>
 
     <footer class="footer">
-        <p>Disciplina + Progressão Gradual = Consistência</p>
         <p class="footer-meta">
             <span id="appVersao"></span> · <a href="privacidade.html">Privacidade</a> · <a href="termos.html">Termos de uso</a>
         </p>

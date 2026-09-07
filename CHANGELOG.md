@@ -3,6 +3,14 @@
 Todas as mudanças relevantes deste projeto são documentadas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/).
 
+## [0.6.0-beta] - 2026-08-22
+
+### Alterado
+- Exportar/Importar/Imprimir saem da barra sempre visível e passam a viver atrás de um menu ☰ no canto do cabeçalho; "Instalar app" continua visível fora do menu, agora só com ícone, e some sozinho quando o app já está rodando instalado (checagem por `display-mode: standalone`, além do fluxo padrão de `beforeinstallprompt`/`appinstalled`).
+- Lista de dias vira um grupo único, flat e sempre em uma coluna: sem espaço entre os dias (só uma linha fina de divisão), preenchendo a altura da tela quando todos estão fechados. Barra colorida por dia mantida, mais fina (3px).
+- Removida a frase de efeito do rodapé ("Disciplina + Progressão Gradual = Consistência"); mantida a linha de versão/Privacidade/Termos.
+- Campos de edição (duplo clique) agora usam o mesmo tamanho e peso de fonte do texto que substituem, com padding interno consistente e altura mínima confortável — o nome do exercício em edição fica do mesmo tamanho/negrito que em exibição, e o campo de repetições ficou mais largo (64px → 78px).
+
 ## [0.5.0-beta] - 2026-08-22
 
 ### Alterado
